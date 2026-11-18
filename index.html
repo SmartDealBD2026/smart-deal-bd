@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>Smart Deal BD</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f6fa;color:#182235}
+header{background:#101827;color:white;padding:20px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:bold;color:#42d6a4}
+button{border:0;border-radius:9px;padding:11px 15px;cursor:pointer;font-weight:bold}
+.admin{background:#42d6a4;color:#102030}
+.hero{padding:35px 20px;text-align:center;background:#172b49;color:white}
+.hero h1{font-size:30px;margin:5px}
+.hero p{color:#d5e1f0}
+.search{width:90%;max-width:480px;padding:14px;border:0;border-radius:10px;margin-top:15px}
+main{padding:20px;max-width:1100px;margin:auto}
+.categories{display:flex;gap:9px;overflow-x:auto;padding:12px 0}
+.categories button{background:#e2e9f2;white-space:nowrap}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:15px}
+.card{background:white;border-radius:13px;padding:12px;box-shadow:0 3px 12px #0000000c}
+.card img{width:100%;height:145px;object-fit:contain;background:#f2f4f7;border-radius:9px}
+.card h3{font-size:15px;min-height:36px}
+.price{font-weight:bold;color:#07885e}
+.buy{width:100%;background:#102b4c;color:white;margin-top:8px}
+footer{text-align:center;padding:25px;background:#101827;color:white;margin-top:30px}
+.panel{display:none;background:white;padding:18px;border-radius:12px;margin:20px 0}
+.panel input,.panel textarea,.panel select{width:100%;padding:12px;margin:7px 0 12px;border:1px solid #ccd3dd;border-radius:8px}
+.panel label{font-weight:bold}
+.add{background:#07885e;color:white}
+</style>
+</head>
+<body>
+
+<header>
+<nav>
+<div class="logo">🛍 Smart Deal BD</div>
+<button class="admin" onclick="toggleAdmin()">Admin Panel</button>
+</nav>
+</header>
+
+<section class="hero">
+<h1>Find Your Best Deals!</h1>
+<p>Discover great products at great prices.</p>
+<input class="search" id="search" placeholder="Search products..." oninput="showProducts()">
+</section>
+
+<main>
+<section class="panel" id="panel">
+<h2>➕ Add Your Product</h2>
+<label>Product Name</label>
+<input id="pname" placeholder="Enter product name">
+<label>Price (৳)</label>
+<input id="price" type="number" placeholder="Enter price">
+<label>Image URL</label>
+<input id="photo" placeholder="Paste image link">
+<label>Buy Link</label>
+<input id="link" placeholder="Product or affiliate link">
+<label>Category</label>
+<select id="category">
+<option>Electronics</option>
+<option>Fashion</option>
+<option>Home</option>
+<option>Other</option>
+</select>
+<button class="add" onclick="addProduct()">Add Product</button>
+</section>
+
+<h2>Explore Categories</h2>
+<div class="categories">
+<button onclick="filter('All')">All</button>
+<button onclick="filter('Electronics')">Electronics</button>
+<button onclick="filter('Fashion')">Fashion</button>
+<button onclick="filter('Home')">Home</button>
+<button onclick="filter('Other')">Other</button>
+</div>
+
+<h2>🔥 Featured Products</h2>
+<div class="products" id="products"></div>
+</main>
+
+<footer>
+<h3>Smart Deal BD</h3>
+<p>Find your favorite products in one place.</p>
+<p>Affiliate Disclosure: We may earn commission from qualifying purchases.</p>
+</footer>
+
+<script>
+let items=[
+{name:"Wireless Headphones",price:850,category:"Electronics",photo:"https://placehold.co/300x200?text=Headphones",link:"https://www.daraz.com.bd/"},
+{name:"Smart Watch",price:1200,category:"Electronics",photo:"https://placehold.co/300x200?text=Smart+Watch",link:"https://www.daraz.com.bd/"},
+{name:"Fashion Bag",price:650,category:"Fashion",photo:"https://placehold.co/300x200?text=Fashion+Bag",link:"https://www.daraz.com.bd/"},
+{name:"Home Lamp",price:450,category:"Home",photo:"https://placehold.co/300x200?text=Home+Lamp",link:"https://www.daraz.com.bd/"}
+];
+
+let selected="All";
+
+function showProducts(){
+let search=document.getElementById("search").value.toLowerCase();
+let list=items.filter(p=>
+(selected==="All"||p.category===selected)&&
+p.name.toLowerCase().includes(search)
+);
+document.getElementById("products").innerHTML=list.map(p=>`
+<div class="card">
+<img src="${safe(p.photo)}" alt="Product" onerror="this.src='https://placehold.co/300x200?text=Product'">
+<h3>${safe(p.name)}</h3>
+<div class="price">৳${Number(p.price).toLocaleString("en-BD")}</div>
+<button class="buy" onclick="buy('${safe(p.link)}')">Buy Now</button>
+</div>`).join("")||"<p>No products found.</p>";
+}
+
+function safe(s){
+return String(s).replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+function filter(c){selected=c;showProducts()}
+
+function toggleAdmin(){
+let p=document.getElementById("panel");
+p.style.display=p.style.display==="block"?"none":"block";
+}
+
+function addProduct(){
+let name=document.getElementById("pname").value.trim();
+let price=Number(document.getElementById("price").value);
+let photo=document.getElementById("photo").value.trim();
+let link=document.getElementById("link").value.trim();
+let category=document.getElementById("category").value;
+
+if(!name||price<=0||!link){
+alert("Please enter product name, valid price and buy link.");
+return;
+}
+if(!/^https?:\/\//i.test(link)){
+alert("Please enter a valid link starting with https://");
+return;
+}
+items.push({name,price,photo:photo||"https://placehold.co/300x200?text=Product",link,category});
+document.getElementById("pname").value="";
+document.getElementById("price").value="";
+document.getElementById("photo").value="";
+document.getElementById("link").value="";
+showProducts();
+alert("Product added for this demo!");
+}
+
+function buy(link){if(/^https?:\/\//i.test(link))window.open(link,"_blank","noopener");}
+
+showProducts();
+</script>
+</body>
+</html>
